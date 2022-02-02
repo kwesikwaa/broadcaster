@@ -10,12 +10,12 @@ class Pagescroller extends StatefulWidget {
 }
 
 class  _PagescrollerState extends State<Pagescroller> {
-  final _pagecontroler = PageController(viewportFraction: 0.8);
+  final _pagecontroler = PageController(viewportFraction: 0.75);
 
   @override
   void dispose() {
     // TODO: implement dispose
-    
+    super.dispose();
     _pagecontroler.dispose();
   }
 

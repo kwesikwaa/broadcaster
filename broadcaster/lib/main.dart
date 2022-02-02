@@ -1,3 +1,4 @@
+import 'package:broadcaster/screens/pagescroller.dart';
 import 'package:flutter/material.dart';
 import 'package:broadcaster/mainstuff.dart';
 
@@ -15,7 +16,13 @@ class Entry extends StatelessWidget {
       title: 'Broadify',
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
-      home:SafeArea(child: Broadcaster()));
+      home:SafeArea(
+        child:
+        //two seperate apps and since this isnt production app
+        //why not
+          Pagescroller()
+          // Broadcaster()
+        ));
   }
 }
 

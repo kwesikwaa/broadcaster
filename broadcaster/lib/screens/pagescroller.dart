@@ -62,18 +62,22 @@ class  _PagescrollerState extends State<Pagescroller> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: AssetImage(toys[indexpage.toInt()].image))
-              ),
-            child:BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10,sigmaY: 10),
-              child: Container(
-                color: Colors.black.withOpacity(0.2),
-              ),
-              )
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 1500),
+            child: Container(
+              key: ValueKey(toys[indexpage.toInt()].name),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: AssetImage(toys[indexpage.toInt()].image))
+                ),
+              child:BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10,sigmaY: 10),
+                child: Container(
+                  color: Colors.white.withOpacity(0.1),
+                ),
+                )
+            ),
           ),
           Column(
           children: [
@@ -109,7 +113,7 @@ class  _PagescrollerState extends State<Pagescroller> {
                     padding: const EdgeInsets.only(left: 10,right: 10,top: 30,bottom: 90),
                     child: Transform(
                       alignment: Alignment.center,
-                      transform: Matrix4.identity()..setEntry(3, 2, 0.001)..rotateY(1-indexpage),
+                      transform: Matrix4.identity()..setEntry(3, 2, 0.001)..rotateY(index==indexpage?0:.75),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.bounceInOut,

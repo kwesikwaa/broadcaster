@@ -1,4 +1,4 @@
-import 'package:broadcaster/screens/pagescroller.dart';
+import 'package:broadcaster/screens/pagscrollerNew.dart';
 import 'package:flutter/material.dart';
 import 'package:broadcaster/mainstuff.dart';
 

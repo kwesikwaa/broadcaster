@@ -22,6 +22,7 @@ class  _PagescrollerState extends State<Pagescroller> {
   double curindex=1;
   double indexpage=1;
   
+  
   _listen(){
     setState(() {
       curindex = _pagecontroler.page;
@@ -30,6 +31,7 @@ class  _PagescrollerState extends State<Pagescroller> {
       if(_pagecontroler.position.userScrollDirection == ScrollDirection.reverse){
         if(calc > 0.7){
           indexpage = curindex.ceilToDouble();
+          
         }
         else{indexpage = curindex.floorToDouble();}
       }
@@ -62,7 +64,6 @@ class  _PagescrollerState extends State<Pagescroller> {
     return Scaffold(
       body: Stack(
         children: [
-          //Background Image
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 1500),
             child: Container(
@@ -80,82 +81,95 @@ class  _PagescrollerState extends State<Pagescroller> {
                 )
             ),
           ),
-          //PageView
-          FractionallySizedBox(
-                heightFactor: 0.6,
-                child: PageView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: toys.length,
-                    controller: _pagecontroler,
-                    itemBuilder: (context, index){
-                      return FractionallySizedBox(
-                        widthFactor: 0.85,
-                        child: AnimatedContainer(
-                          clipBehavior: Clip.hardEdge,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.bounceInOut,
-                          margin: EdgeInsets.only(top: index==indexpage?60:100,bottom: 10),
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                      
-                              image: AssetImage(toys[index].image),
-                              fit: BoxFit.cover
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:[
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(20, (index) => Card(color: Colors.lime, child:ListTile(title: Text("I be number $index"),))),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: FractionallySizedBox(
+                  heightFactor: 1,
+                  child: PageView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: toys.length,
+                      controller: _pagecontroler,
+                      itemBuilder: (context, index){
+                        return FractionallySizedBox(
+                          widthFactor: 0.85,
+                          child: AnimatedContainer(
+                            clipBehavior: Clip.hardEdge,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.bounceInOut,
+                            margin: EdgeInsets.only(top: index==indexpage?20:40,bottom: 5),
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                                
+                                image: AssetImage(toys[index].image),
+                                fit: BoxFit.cover
+                              ),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Stack(
-                            children: [Align(
-                              alignment: Alignment.bottomLeft,
-                              child: FittedBox(
-                                child: Container(
-                                  color: Colors.black.withOpacity(0.3),
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(toys[index].name, style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w600, color: Colors.amber),),
-                                        Text("GHC ${toys[index].price}", style: const TextStyle(fontSize: 32,fontWeight: FontWeight.w700, color: Colors.amber),),
-                                      ],
+                            child: Stack(
+                              children: [Align(
+                                alignment: Alignment.bottomLeft,
+                                child: FittedBox(
+                                  child: Container(
+                                    color: Colors.black.withOpacity(0.3),
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(toys[index].name, style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w600, color: Colors.amber),),
+                                          Text("GHC ${toys[index].price}", style: const TextStyle(fontSize: 32,fontWeight: FontWeight.w700, color: Colors.amber),),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),]
+                              ),]
+                            ),
                           ),
-                        ),
-                      );
-                    }
+                        );
+                      }
+                  ),
                 ),
               ),
-          Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      children: List.generate(
-                        widget.categories.length, 
-                        (index) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: OutlinedButton(
-                            style: const ButtonStyle(),
-                            onPressed: (){},
-                            child: Text(
-                              widget.categories[index],
-                              style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w700,color: Colors.greenAccent),),
-                          ),
-                        ),)
-                    ),),
-              ),
-            ),
-                   
+              Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                    child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          children: List.generate(
+                            widget.categories.length, 
+                            (index) => Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: OutlinedButton(
+                                style: const ButtonStyle(),
+                                onPressed: (){},
+                                child: Text(
+                                  widget.categories[index],
+                                  style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w700,color: Colors.greenAccent),),
+                              ),
+                            ),)
+                        ),),
+                  ),
+                ),
+            ]
+          ),     
         ],
-      ),
+      )
     );
   }
 }

@@ -1,6 +1,11 @@
-import 'package:broadcaster/screens/pagscrollerNew.dart';
+// ignore_for_file: prefer_const_constructors
+
+import 'package:broadcaster/rnd/newset.dart';
+// import 'package:broadcaster/screens/pagscrollerNew.dart';
 import 'package:flutter/material.dart';
 import 'package:broadcaster/mainstuff.dart';
+
+import 'rnd/pagscrollerNew.dart';
 
 
 void main() { 
@@ -20,7 +25,7 @@ class Entry extends StatelessWidget {
         child:
         //two seperate apps and since this isnt production app
         //why not
-          Pagescroller()
+          ToyShop()
           // Broadcaster()
         ));
   }

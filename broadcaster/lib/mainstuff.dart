@@ -140,7 +140,7 @@ _addtoBroadcast(int index, MyContact w){
                               var thiscontact = cast[index];
                               return GestureDetector(
                                 //make changes for auto keyboard adjustment
-                                onTap: (){_modaltins(context,s.height*0.6,thiscontact);},
+                                onTap: (){/*_modaltins(context,s.height*0.6,thiscontact);*/},
                                 child: Card(
                                   child: ListTile(
                                     title: Text(thiscontact.contact.contact.displayName),
@@ -231,7 +231,7 @@ _addtoBroadcast(int index, MyContact w){
                       Expanded(
                         flex: 1,
                         child: GestureDetector(
-                          onTap: (){_sendmsg();},
+                          onTap: (){/*_sendmsg();*/},
                           child: Container(
                             child: Center(child:(Text('SEND'))),
                             decoration: BoxDecoration(
@@ -250,6 +250,7 @@ _addtoBroadcast(int index, MyContact w){
        
     );
   }
+
 }
 
 

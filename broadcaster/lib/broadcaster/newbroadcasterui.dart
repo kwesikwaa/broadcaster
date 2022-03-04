@@ -7,9 +7,9 @@ import 'package:broadcaster/broadcaster/pages/messagepage.dart';
 import 'package:flutter/material.dart';
 
 class BroadcastUI extends StatelessWidget {
-  const BroadcastUI({Key key}) : super(key: key);
+  BroadcastUI({Key key}) : super(key: key);
 
-  final _focus = true;
+  bool _focus = true;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +37,8 @@ class BroadcastUI extends StatelessWidget {
               child: AnimatedRotation(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.bounceInOut,
-                turns: _focus?-0.4:0,
-                alignment: Alignment.bottomCenter,
+                turns: _focus?-0.04:0,
+                alignment: Alignment.center,
                 child: Image(
                   image: const AssetImage('assets/images/aaa2.png'),
                   width: size.width*.6,
@@ -67,6 +67,7 @@ class BroadcastUI extends StatelessWidget {
                         padding: const EdgeInsets.all(10.0),
                         child: InkWell(
                           onTap: (){
+                           
                             _pushto(context, index);
                           },
                           splashColor: Colors.red,
@@ -106,7 +107,7 @@ icony(index){
     return const Hero(tag:"history",child: Icon(Icons.history_outlined, color: Colors.grey, size: 30));
   }
   else if(index == 3){
-    return const Hero(tag:"message",child: Icon(Icons.message, color: Colors.green, size: 30));
+    return const Hero(tag:"message",child: Icon(Icons.message, color: Colors.cyan, size: 30));
   }
   // return Container();
 }

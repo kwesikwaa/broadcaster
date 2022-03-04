@@ -95,72 +95,6 @@ _addtoBroadcast(int index, MyContact w){
 }
 
 
- _sendmsg() async{
-   var y = [];
-    if(msgfield.text != null && cast.isNotEmpty){
-      if(msgfield.text.contains("@here")){
-        print('yes it has');
-        cast.forEach((element) {
-          var z = msgfield.text.replaceAll("@here", element.salutation); 
-          y.add(z);
-          y.add; 
-        });
-        
-        //SMS CONNECTIONMAN
-        for(int i=0;i<y.length; i++){
-          var w = cast[i].contact.contact.phones.elementAt(0).value.toString();
-          var m = y[i];
-          print("inside sender");
-          await telephony.sendSms(to: w, message: m);
-        }
-        //link to async response before production
-        _tempmodal(y);  
-      }
-      else{
-        print('naa e no get');
-        for( var i in cast){
-          y.add(msgfield.text);
-        }
-        _tempmodal(y);  
-      }
-    }
-  }
-
-  _tempmodal(msg){
-    showModalBottomSheet(
-      context: context, 
-      builder: (BuildContext context){
-      return Container(
-        child: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Column(
-            children: [
-              Text('Total messages sent: ${msg.length}', style: TextStyle(color: Colors.yellow[500])),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: msg.length,
-                    itemBuilder: (context, index)
-                    {
-                     return BubbleSpecialTwo(
-                       text: msg[index],
-                       tail: true,
-                       isSender: true,
-                       sent: true,
-                       delivered: true,
-                     );
-                    }),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
   _newContactCheck() async{
     //checking to see if additional contact have been added to the address book
     // this is to be called inside a refresh call or wheneever user opens contacts
@@ -178,51 +112,8 @@ _addtoBroadcast(int index, MyContact w){
     
   }
   
-  _modaltins(context, ht,y){
-    showModalBottomSheet(
-      context: context, 
-      builder:(BuildContext context){
-        // modaltext.text = y.salutation;
-        return Container(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-                child: TextField(
-                  controller: modaltext,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusColor: Colors.white,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                      borderRadius: BorderRadius.circular(10)
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                      borderRadius: BorderRadius.circular(10)
-                    )
-                  ),
-                  // textInputAction: TextInputAction.done,
-                ),
-              ),
-              ElevatedButton(
-                onPressed: (){setState(() {
-                  if(modaltext.text != ''){
-                    y.salutation = modaltext.text;
-                    modaltext.clear();
-                  }
-                });
-                  Navigator.of(context).pop();
-              }, 
-              child: Text('Save'))
-            ],
-          ),
-          height: ht,
-        );
-      }
-    );
-  }
+  
+
 
 
   @override

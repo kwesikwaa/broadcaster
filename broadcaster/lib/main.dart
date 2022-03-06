@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:broadcaster/broadcaster/newbroadcasterui.dart';
+import 'package:broadcaster/broadcaster/pages/history.dart';
 import 'package:broadcaster/broadcaster/pages/messagepage.dart';
 import 'package:broadcaster/rnd/newset.dart';
 // import 'package:broadcaster/screens/pagscrollerNew.dart';
@@ -27,8 +28,9 @@ class Entry extends StatelessWidget {
         child:
         //two seperate apps and since this isnt production app
         //why not
-          Messagepage()
-          // BroadcastUI()1
+          // Historypage()
+          // Messagepage()
+          BroadcastUI()
           // ToyShop()
         ));
   }

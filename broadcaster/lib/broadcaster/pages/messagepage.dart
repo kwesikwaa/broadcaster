@@ -142,6 +142,7 @@ class _MessagepageState extends State<Messagepage> {
                           minLines: null,
                           style: const TextStyle(color: Colors.black87),
                           decoration: const InputDecoration(
+                            
                             labelText: 'Message',
                             labelStyle: TextStyle(fontSize: 20, color: Colors.cyan),
                             focusedBorder: OutlineInputBorder(

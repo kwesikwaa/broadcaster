@@ -16,6 +16,7 @@ class Switchy{
   static bool open = false;
 }
 
+//create auto group name eg group1 group2 group3
 List<BroadcastGroups>  broadcastgroups = [
   // BroadcastGroups(name:"church", selected: false, listy: xxxx),
   // BroadcastGroups(name:"jss mates", selected: false),
@@ -76,7 +77,7 @@ class Sendmessage{
             var name = eachcontact.nametocall;
             //was it one contact selected or many??
             var contacts = eachcontact.contact.contacts;
-            
+
 
           }
         }

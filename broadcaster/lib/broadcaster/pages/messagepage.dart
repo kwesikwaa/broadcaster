@@ -2,13 +2,16 @@
 
 import 'package:broadcaster/broadcaster/data_model_etc.dart';
 import 'package:broadcaster/broadcaster/pages/draftspage.dart';
+import 'package:broadcaster/broadcaster/pages/history.dart';
 import 'package:flutter/material.dart';
 
 class Messagepage extends StatefulWidget {
   final String message;
+  final String id;
+  // final 
   
 
-  const Messagepage({Key key, this.message}) : super(key: key);
+  const Messagepage({Key key, this.message, this.id}) : super(key: key);
   
   @override
   State<Messagepage> createState() => _MessagepageState();
@@ -86,14 +89,14 @@ class _MessagepageState extends State<Messagepage> {
                             OutlinedButton(
                               onPressed: (){
                                 setState(() {
-                                  broadcastgroups[index].selected = !broadcastgroups[index].selected;  
+                                  broadcastgroups[index].groupselected = !broadcastgroups[index].groupselected;  
                                 });
                               },
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.cyan.withOpacity(broadcastgroups[index].selected?1:0),
+                                backgroundColor: Colors.cyan.withOpacity(broadcastgroups[index].groupselected?1:0),
                                 side: const BorderSide(width: 1, color: Colors.cyan)),
-                              child: Text(broadcastgroups[index].name,
-                                style: TextStyle(color: broadcastgroups[index].selected?Colors.white:Colors.black38),),
+                              child: Text(broadcastgroups[index].groupname,
+                                style: TextStyle(color: broadcastgroups[index].groupselected?Colors.white:Colors.black38),),
                             ),
                             //using the dart spread operator
                           ...[
@@ -141,8 +144,7 @@ class _MessagepageState extends State<Messagepage> {
                           maxLines: null,
                           minLines: null,
                           style: const TextStyle(color: Colors.black87),
-                          decoration: const InputDecoration(
-                            
+                          decoration: const InputDecoration( 
                             labelText: 'Message',
                             labelStyle: TextStyle(fontSize: 20, color: Colors.cyan),
                             focusedBorder: OutlineInputBorder(
@@ -161,11 +163,32 @@ class _MessagepageState extends State<Messagepage> {
                             child: ElevatedButton(
                               onPressed: (){
                                 if(msgfield.text.trim().length>3){
-                                  Draft draft = Draft(
-                                    message: msgfield.text,
-                                    contactlists: broadcastgroups.where((element) => element.selected == true).toList());
-                                  drafts.add(draft);
+                                  if(widget.id == null){
+                                    var x = broadcastgroups.where((element) => element.groupselected == true).toList();
+                                    List<String> selectedlist;
+                                    for(var e in x){
+                                      selectedlist.add(e.groupname);
+                                    }
+                                    Draft draft = Draft(
+                                      id: DateTime.now().toString(),
+                                      message: msgfield.text,
+                                      contactlists: selectedlist
+                                    );
+                                    drafts.add(draft);
+                                    //hive save
+                                  }
+                                  else{
+                                    //update draft values
+                                    for (var element in drafts) {
+                                      if(element.id == widget.id){
+                                        element.message = msgfield.text;
+                                        // element.contactlists =
+                                        
+                                      }
+                                    }
+                                  }
                                   msgfield.text = '';
+                                  broadcastgroups.map((e) => e.groupselected = false);
                                   Navigator.push(context,MaterialPageRoute(builder: (context)=> const Draftspage()));
                                 }
                               }, 
@@ -175,7 +198,22 @@ class _MessagepageState extends State<Messagepage> {
                           ),
                           const SizedBox(width: 3,),
                           Expanded(
-                            child: ElevatedButton(onPressed: (){}, 
+                            child: ElevatedButton(
+                              onPressed: ()async {
+                                // one takes care of filter the other doesnt
+                                var sendnew = Sendmessage();
+                                await sendnew.send(msgfield.text, broadcastgroups);
+                                // await Sendmessage().send(msgfield.text, broadcastgroups.where((element) => element.groupselected == true).toList());
+                                History hist = History(
+                                  date: DateTime.now().toString(),
+                                  message: msgfield.text,
+                                  totalsent: sendnew.totalsent //replace this
+                                );
+                                history.add(hist);
+                                msgfield.text = '';
+                                broadcastgroups.map((e) => e.groupselected = false);
+                                Navigator.push(context,MaterialPageRoute(builder: (context)=> const Historypage()));
+                              }, 
                               child: const Text("SEND"),
                               style: ElevatedButton.styleFrom(primary: Colors.cyan),
                             ),

@@ -4,29 +4,13 @@ import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class BroadcastGroups{
-  String name;
-  bool selected = false;
-  List<BroadcastContact> listy = [];
 
-  BroadcastGroups({this.name, this.selected, this.listy});
-}
 
 class Switchy{
   static bool open = false;
 }
 
-//create auto group name eg group1 group2 group3
-List<BroadcastGroups>  broadcastgroups = [
-  // BroadcastGroups(name:"church", selected: false, listy: xxxx),
-  // BroadcastGroups(name:"jss mates", selected: false),
-  // BroadcastGroups(name:"ss mates", selected: false),
-  // BroadcastGroups(name:"legon mates", selected: false),
-  // BroadcastGroups(name:"work group", selected: false),
-  // BroadcastGroups(name:"hood", selected: false),
-  // BroadcastGroups(name:"football joint", selected: false),
-];
-
+List<BroadcastGroup>  broadcastgroups = [];
 List<History> history = [
   History(totalsent: 10, date: '30/07/2022', message: 'Yo we dey town today anaa'),
   History(totalsent: 25, date: '02/04/2022', message: 'Hello Sign up to our new packag '),
@@ -43,10 +27,11 @@ List<History> history = [
 List<Draft> drafts = [];
 
 class Draft{
+  String id;
   String message;
-  List<BroadcastGroups> contactlists;
+  List<String> contactlists;
 
-  Draft({this.message, this.contactlists});
+  Draft({this.id, this.message, this.contactlists});
 }
 
 class History{
@@ -61,153 +46,93 @@ class Sendmessage{
   final Telephony telephony = Telephony.instance;
   final history = History();
   var y = [];
+  int totalsent = 0;
 
-  _send(final msgfield, List<BroadcastGroups> castlist) async{
-    if(msgfield.text != null && castlist.isNotEmpty){
-      if(msgfield.text.contains("@namehere")){
-        List<BroadcastGroups> templist = [];
+  send(String msgfield, List<BroadcastGroup> castlist) async{
+    bool ithasname = msgfield.contains("@namehere") ? true : false;    
+    if(msgfield != null && castlist.isNotEmpty){
+        List<BroadcastGroup> templist = [];
         //add selected groups to tepmlist eg. hood, jss mates etc
+        // taken care of in UI??
         for(var group in castlist){
-          if(group.selected){
+          if(group.groupselected){
             templist.add(group);
           }
         }
-        for(BroadcastGroups eachgroup in templist){
-          for(BroadcastContact eachcontact in eachgroup.listy){
+        for(BroadcastGroup eachgroup in templist) //eg. uni mates
+        {
+          for(BroadcastContact eachcontact in eachgroup.contactlist){
             var name = eachcontact.nametocall;
-            //was it one contact selected or many??
-            var contacts = eachcontact.contact.contacts;
-
-
+            var contact = eachcontact.contact.contact;
+            var message = ithasname ? msgfield.replaceAll("@namehere", name) : msgfield;
+            totalsent ++;
+            await telephony.sendSms(to: contact, message: message);
           }
-        }
-
-        castlist.forEach((element) {
-          var z = msgfield.text.replaceAll("@name", element); 
-          y.add(z);
-          // y.add; 
-        });
-        for(var x in broadcastgroups){
-          if(x.selected){
-            _smsconnection(castlist);
-          //add to history here
-          _donedialog(y);  
-          }
-        }
-      }
-
-      else{
-        for( var i in castlist){
-          y.add(msgfield.text);
-        }
-        for(var x in broadcastgroups){
-          if(x.selected){
-            _smsconnection(castlist);
-          //add to history here
-          _donedialog(y);  
-          }
-        }
-      }
+        }       
     }
   }
-  _smsconnection(final cast)async{
-    for(int i=0;i<y.length; i++){
-          var w = cast[i].contact.contact.phones.elementAt(0).value.toString();
-          var m = y[i];
-          await telephony.sendSms(to: w, message: m);
-        }
-  }
-
-  _donedialog(msg){
-    showModalBottomSheet(
-      // context: context, 
-      builder: (BuildContext context){
-      return Container(
-        child: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Column(
-            children: [
-              Text('Chale! ${msg.length} total sms sent', style: TextStyle(color: Colors.yellow[500])),
-              //wrap this in a fixed size
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: msg.length,
-                    itemBuilder: (context, index)
-                    {
-                     return BubbleSpecialTwo(
-                       text: msg[index],
-                       tail: true,
-                       isSender: true,
-                       sent: true,
-                       delivered: true,
-                     );
-                    }),
-                ),
-              ),
-              ElevatedButton(onPressed: (){Navigator.pop(context);}, child: const Text('OK'))
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  
-
 }
 
+/// CONTACTS RELATED
+/// 
 class PhoneContact{
-  List contacts;
+  String contact;
   bool selected = false;
   String name;
 
-  PhoneContact({this.contacts, this.selected, this.name});   
+  PhoneContact({this.contact, this.selected, this.name});   
 }
 class BroadcastContact{
   PhoneContact  contact;
   String nametocall;
 
-  BroadcastContact({@required this.contact,@required this.nametocall});
+  BroadcastContact({@required this.contact, this.nametocall});
+}
+
+class BroadcastGroup{
+  String groupname;
+  bool groupselected = false;
+  List<BroadcastContact> contactlist = [];
+
+  BroadcastGroup({this.groupname, this.groupselected, this.contactlist});
 }
 
 class ContactsClass{
   static List<PhoneContact> allcontacts =[];
-  static List<BroadcastContact> broadcastlist = [];
+  List<BroadcastContact> broadcastlist = [];
 
-  _permit() async{
+  permit() async{
     var pstatus = await Permission.contacts.status;
     
     if(!pstatus.isGranted){
       await Permission.contacts.request();
       await Permission.sms.request();
-      _getcontacts();
+      getcontacts();
     }
-    else{_getcontacts();}
+    else if(allcontacts.isEmpty){
+      getcontacts();
+    }
   }
 
-  _getcontacts() async{
-    List<Contact> _c = (await ContactsService.getContacts()).toList(); 
-    setState(() {
-      _c.forEach((element) {
-        
-        if(element.phones.isNotEmpty){
-          PhoneContact onecontact;
-          onecontact.name = element.displayName;
-          for (var x in element.phones){
-            if(x.value.length > 8){
-              onecontact.contacts.add(x);
-            }
-          } 
-          allcontacts.add(onecontact);
-        }
-       });
-      });
+  //pull up for refresh too
+  getcontacts() async{
+    allcontacts.clear();
+    List<Contact> mycontacts = (await ContactsService.getContacts()).toList(); 
+    for(var element in mycontacts){
+      if(element.phones.isNotEmpty){
+        for (var variable in element.phones){
+          if(variable.value.length > 8){
+            PhoneContact onecontact;
+            onecontact.name = element.displayName;
+            onecontact.contact = variable.value;
+            allcontacts.add(onecontact);
+          }
+        } 
+      }
+    }
   }
 
-  _addContactToBroadcastList(int index, PhoneContact con){
+  addContactToBroadcastList(int index, PhoneContact con){
     if(!con.selected){
       broadcastlist.removeWhere((element)=> element.contact == con);
     }
@@ -215,5 +140,10 @@ class ContactsClass{
       BroadcastContact x = BroadcastContact(contact: allcontacts[index], nametocall: allcontacts[index].name);
       broadcastlist.add(x);
     }
+  }
+  savebroadcastlist({List<BroadcastContact> broadcastlist, String groupname, bool selected}){
+    BroadcastGroup onegroup = BroadcastGroup(groupname: groupname, contactlist: broadcastlist, groupselected: selected);
+    // get a place to keep these.. locally or a db
+    broadcastgroups.add(onegroup);
   }
 }

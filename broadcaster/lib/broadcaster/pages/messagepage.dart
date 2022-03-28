@@ -2,16 +2,18 @@
 
 import 'package:broadcaster/broadcaster/data_model_etc.dart';
 import 'package:broadcaster/broadcaster/pages/draftspage.dart';
+import 'package:broadcaster/broadcaster/pages/groupspage.dart';
 import 'package:broadcaster/broadcaster/pages/history.dart';
 import 'package:flutter/material.dart';
 
 class Messagepage extends StatefulWidget {
   final String message;
   final String id;
+  final List<String> selectedlists;
   // final 
   
 
-  const Messagepage({Key key, this.message, this.id}) : super(key: key);
+  const Messagepage({Key key, this.message, this.id, this.selectedlists}) : super(key: key);
   
   @override
   State<Messagepage> createState() => _MessagepageState();
@@ -34,6 +36,15 @@ class _MessagepageState extends State<Messagepage> {
   @override
   void initState() {
     super.initState();
+    if(widget.selectedlists != null && widget.selectedlists.isNotEmpty){
+      for(var x in widget.selectedlists){
+        broadcastgroups.map((e){
+          if(e.groupname == x){
+            e.groupselected = true;
+          }
+        }).toList();
+      }
+    }
     if(widget.message != null){
       msgfield.text = widget.message;
     }
@@ -45,6 +56,7 @@ class _MessagepageState extends State<Messagepage> {
   void dispose() {
     super.dispose();
     msgfield.dispose();
+    broadcastgroups.map((e) => e.groupselected=false).toList();
     _scrontroller.dispose();
   }
 
@@ -100,18 +112,11 @@ class _MessagepageState extends State<Messagepage> {
                             ),
                             //using the dart spread operator
                           ...[
-                            OutlinedButton(
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              onPressed: (){},
-                              child: Container(
-                                height: 30, width: 30,
-                                decoration: const BoxDecoration(
-                                  color: Colors.cyan,
-                                  shape: BoxShape.circle
-                                ),
-                                child: const Align(alignment: Alignment(0,0.5),child: Text('x',style: TextStyle(fontSize: 30,color: Colors.white),)),
-                              ),
-                            )
+                            IconButton(
+                              onPressed: (){
+                                Navigator.push(context,MaterialPageRoute(builder: (context)=> const Groupspage(roundtrip: true,)));
+                              }, 
+                              icon: const Icon(Icons.add_circle,color:Colors.cyan, size: 30,))
                           ]
                         ]
                       ),
@@ -157,68 +162,74 @@ class _MessagepageState extends State<Messagepage> {
                         ),
                       ),
                       const SizedBox(height: 15,),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: (){
-                                if(msgfield.text.trim().length>3){
-                                  if(widget.id == null){
-                                    var x = broadcastgroups.where((element) => element.groupselected == true).toList();
-                                    List<String> selectedlist;
-                                    for(var e in x){
-                                      selectedlist.add(e.groupname);
+                      Container(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: (){
+                                  if(msgfield.text.trim().length>3){
+                                    if(widget.id == null){
+                                      var x = broadcastgroups.where((element) => element.groupselected == true).toList();
+                                      List<String> selectedlist = [];
+                                      for(var e in x){
+                                        selectedlist.add(e.groupname);
+                                      }
+                                      Draft draft = Draft(
+                                        id: DateTime.now().toString(),
+                                        message: msgfield.text,
+                                        contactlists: selectedlist
+                                      );
+                                      drafts.add(draft);
+                                      //hive save
                                     }
-                                    Draft draft = Draft(
-                                      id: DateTime.now().toString(),
-                                      message: msgfield.text,
-                                      contactlists: selectedlist
-                                    );
-                                    drafts.add(draft);
-                                    //hive save
-                                  }
-                                  else{
-                                    //update draft values
-                                    for (var element in drafts) {
-                                      if(element.id == widget.id){
-                                        element.message = msgfield.text;
-                                        // element.contactlists =
-                                        
+                                    else{
+                                      //update draft value
+                                      var x = broadcastgroups.where((element) => element.groupselected == true).toList();
+                                      List<String> selectedlist = [];
+                                      for(var e in x){
+                                        selectedlist.add(e.groupname);
+                                      }
+                                      for (var element in drafts) {
+                                        if(element.id == widget.id){
+                                          element.message = msgfield.text;
+                                          element.contactlists = selectedlist;
+                                          // element.contactlists =
+                                        }
                                       }
                                     }
+                                    msgfield.text = '';
+                                    broadcastgroups.map((e) => e.groupselected = false);
+                                    Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> const Draftspage()));
                                   }
+                                }, 
+                                child: const Text("SAVE"),
+                                style: ElevatedButton.styleFrom(primary: Colors.cyan),
+                              ),
+                            ),
+                            const SizedBox(width: 3,),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: ()async {
+                                  // one takes care of filter the other doesnt
+                                  var sendnew = Sendmessage();
+                                  await sendnew.send(msgfield.text, broadcastgroups);
+                                  // await Sendmessage().send(msgfield.text, broadcastgroups.where((element) => element.groupselected == true).toList());
+                                 
                                   msgfield.text = '';
                                   broadcastgroups.map((e) => e.groupselected = false);
-                                  Navigator.push(context,MaterialPageRoute(builder: (context)=> const Draftspage()));
-                                }
-                              }, 
-                              child: const Text("SAVE"),
-                              style: ElevatedButton.styleFrom(primary: Colors.cyan),
+                                  //remove from draft if draft is sent
+                                  if(widget.id != null){
+                                    drafts.removeWhere((element) => element.id==widget.id);
+                                  }
+                                  Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> const Historypage()));
+                                }, 
+                                child: const Text("SEND"),
+                                style: ElevatedButton.styleFrom(primary: Colors.cyan),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 3,),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: ()async {
-                                // one takes care of filter the other doesnt
-                                var sendnew = Sendmessage();
-                                await sendnew.send(msgfield.text, broadcastgroups);
-                                // await Sendmessage().send(msgfield.text, broadcastgroups.where((element) => element.groupselected == true).toList());
-                                History hist = History(
-                                  date: DateTime.now().toString(),
-                                  message: msgfield.text,
-                                  totalsent: sendnew.totalsent //replace this
-                                );
-                                history.add(hist);
-                                msgfield.text = '';
-                                broadcastgroups.map((e) => e.groupselected = false);
-                                Navigator.push(context,MaterialPageRoute(builder: (context)=> const Historypage()));
-                              }, 
-                              child: const Text("SEND"),
-                              style: ElevatedButton.styleFrom(primary: Colors.cyan),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

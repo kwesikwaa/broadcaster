@@ -12,17 +12,17 @@ class Switchy{
 
 List<BroadcastGroup>  broadcastgroups = [];
 List<History> history = [
-  History(totalsent: 10, date: '30/07/2022', message: 'Yo we dey town today anaa'),
-  History(totalsent: 25, date: '02/04/2022', message: 'Hello Sign up to our new packag '),
-  History(totalsent: 12, date: '26/08/2022', message: 'we have introduce a new deal kindly take time to go through'),
-  History(totalsent: 7, date: '18/12/2022', message: 'Chale the match dey go on so make we postpone the tin'),
-  History(totalsent: 62, date: '10/01/2022', message: 'The monkey business all for end chale'),
-  History(totalsent: 35, date: '06/03/2022', message: 'The oyarifa traffic just be myth aswear! nothing like that dey'),
-  History(totalsent: 11, date: '28/02/2022', message: 'Hi, make a date with us '),
-  History(totalsent: 23, date: '10/05/2022', message: 'Kindly follow the link to be put on the daily something'),
-  History(totalsent: 42, date: '09/09/2022', message: 'Everything go fall in the right place'),
-  History(totalsent: 10200, date: '24/14/2022', message: 'Tech no be hype chale'),
-  History(totalsent: 87, date: '22/06/2022', message: 'The date for the workshop has been moved furhter to the so and so be on the look out for it. Same venue, same agenda'),
+  // History(totalsent: 10, date: '30/07/2022', message: 'Yo we dey town today anaa'),
+  // History(totalsent: 25, date: '02/04/2022', message: 'Hello Sign up to our new packag '),
+  // History(totalsent: 12, date: '26/08/2022', message: 'we have introduce a new deal kindly take time to go through'),
+  // History(totalsent: 7, date: '18/12/2022', message: 'Chale the match dey go on so make we postpone the tin'),
+  // History(totalsent: 62, date: '10/01/2022', message: 'The monkey business all for end chale'),
+  // History(totalsent: 35, date: '06/03/2022', message: 'The oyarifa traffic just be myth aswear! nothing like that dey'),
+  // History(totalsent: 11, date: '28/02/2022', message: 'Hi, make a date with us '),
+  // History(totalsent: 23, date: '10/05/2022', message: 'Kindly follow the link to be put on the daily something'),
+  // History(totalsent: 42, date: '09/09/2022', message: 'Everything go fall in the right place'),
+  // History(totalsent: 10200, date: '24/14/2022', message: 'Tech no be hype chale'),
+  // History(totalsent: 87, date: '22/06/2022', message: 'The date for the workshop has been moved furhter to the so and so be on the look out for it. Same venue, same agenda'),
 ];
 List<Draft> drafts = [];
 
@@ -44,7 +44,7 @@ class History{
 
 class Sendmessage{
   final Telephony telephony = Telephony.instance;
-  final history = History();
+  // final history = History();
   var y = [];
   int totalsent = 0;
 
@@ -68,7 +68,13 @@ class Sendmessage{
             totalsent ++;
             await telephony.sendSms(to: contact, message: message);
           }
-        }       
+        }  
+        History hist = History(
+            date: DateTime.now().toString(),
+            message: msgfield,
+            totalsent: totalsent //replace this
+          );
+        history.add(hist);
     }
   }
 }
@@ -100,8 +106,10 @@ class BroadcastGroup{
 class ContactsClass{
   static List<PhoneContact> allcontacts =[];
   List<BroadcastContact> broadcastlist = [];
+  
 
   permit() async{
+    print('start enght ${allcontacts.length}');
     var pstatus = await Permission.contacts.status;
     
     if(!pstatus.isGranted){
@@ -122,28 +130,36 @@ class ContactsClass{
       if(element.phones.isNotEmpty){
         for (var variable in element.phones){
           if(variable.value.length > 8){
-            PhoneContact onecontact;
-            onecontact.name = element.displayName;
-            onecontact.contact = variable.value;
+            PhoneContact onecontact = PhoneContact(selected: false);
+            onecontact.name = element.displayName??variable.value;
+            onecontact.contact = variable.value.trim();
             allcontacts.add(onecontact);
           }
         } 
       }
     }
+    //run a sort operation here
+    allcontacts.sort((a,b)=> a.name.compareTo(b.name));
+    
+    // allcontacts.removeWhere((element)=>element.contact == element.contact.codeUnitAt(1));
+    print(allcontacts.length);
   }
 
-  addContactToBroadcastList(int index, PhoneContact con){
+  addContactToBroadcastList(int index, PhoneContact con,List<BroadcastContact> broad){
     if(!con.selected){
-      broadcastlist.removeWhere((element)=> element.contact == con);
+      broad.removeWhere((element)=> element.contact == con);
     }
     else{
       BroadcastContact x = BroadcastContact(contact: allcontacts[index], nametocall: allcontacts[index].name);
-      broadcastlist.add(x);
+      broad.add(x);
     }
   }
-  savebroadcastlist({List<BroadcastContact> broadcastlist, String groupname, bool selected}){
-    BroadcastGroup onegroup = BroadcastGroup(groupname: groupname, contactlist: broadcastlist, groupselected: selected);
-    // get a place to keep these.. locally or a db
+  clear(){
+    // broadcastlist.clear();
+    allcontacts.map((e) => e.selected=false).toList();
+  }
+  savebroadcastlist({List<BroadcastContact> castlist, String groupname, bool selected}){
+    BroadcastGroup onegroup = BroadcastGroup(groupname: groupname, contactlist: castlist, groupselected: selected);
     broadcastgroups.add(onegroup);
   }
 }

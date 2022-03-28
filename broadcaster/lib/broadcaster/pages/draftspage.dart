@@ -38,7 +38,7 @@ class _DraftspageState extends State<Draftspage> {
                     itemBuilder: (context,index){
                       return InkWell(
                         onTap: (){
-                          Navigator.push(context,MaterialPageRoute(builder: (context)=> Messagepage(message: drafts[index].message)));
+                          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> Messagepage(message: drafts[index].message,id:drafts[index].id,selectedlists: drafts[index].contactlists)));
                         },
                         splashColor: Colors.cyan,
                         child: Container(
@@ -53,6 +53,7 @@ class _DraftspageState extends State<Draftspage> {
                               Expanded(flex:4,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Text(drafts[index].message,maxLines: 3,overflow:TextOverflow.ellipsis,),color: Colors.grey[600],))),
                               // Expanded(flex:2,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Align(alignment: Alignment.topRight, child: Text(drafts[index].date,textAlign: TextAlign.left,)),color: Colors.grey[700],))),
                               Expanded(flex:1,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Align(alignment: Alignment.topRight, child: Text(drafts[index].contactlists.length.toString(),textAlign: TextAlign.left,)),color: Colors.grey[800],)),),
+                              // Expanded(flex:1,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Align(alignment: Alignment.topRight, child: Text(drafts[index].id,textAlign: TextAlign.left,)),color: Colors.grey[800],)),),
                             ],
                           ),
                         ),

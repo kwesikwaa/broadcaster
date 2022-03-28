@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:broadcaster/broadcaster/data_model_etc.dart';
 import 'package:broadcaster/broadcaster/newbroadcasterui.dart';
 import 'package:broadcaster/broadcaster/pages/history.dart';
 import 'package:broadcaster/broadcaster/pages/messagepage.dart';
@@ -18,8 +19,12 @@ void main() {
 
 
 class Entry extends StatelessWidget {
+  
+  
+
   @override
   Widget build(BuildContext context) {
+    ContactsClass().permit();
     return MaterialApp(
       title: 'Broadify',
       theme: ThemeData.dark(),

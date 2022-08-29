@@ -1,5 +1,15 @@
-# broadcaster
-Personalised SMS broadcaster in flutter
-and
-toy shop app
-The toy shop app started out as an rnd of a sort so coding was done in the same project as the sms broadcaster
+# Broadcaster and ToyShop Apps
+This repo is two flutter apps in one. I guess didnt want the hustle of setting up a new project for the top shop so i decided to make it perch the personliased sms broadcaster.
+
+Personalised SMS broadcaster 
+===========================
+Allows user to provide a name for a each contact to be used to address them in the sms to appear as though the message was fashioned for them specifically.
+ie. "Hello John" "Hello Doe" Hello etc etc. 
+Utilises Hivedb as local database for history and drafts
+
+
+<strong>Toy Shop</strong>
+============================
+Full functional ecommerce app for a toyshop. allows custormers to see items in 3d preview
+It utilises flutter hooks and riverpod.
+Also implements PayStack for payment

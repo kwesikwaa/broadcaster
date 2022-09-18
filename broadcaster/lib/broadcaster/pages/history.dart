@@ -1,5 +1,7 @@
 import 'package:broadcaster/broadcaster/data_model_etc.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 class Historypage extends StatefulWidget {
   const Historypage({Key key}) : super(key: key);
@@ -9,8 +11,23 @@ class Historypage extends StatefulWidget {
 }
 
 class _HistorypageState extends State<Historypage> {
+
+  Box historyhive = Hive.box<History>('history');
+  List<History> _history = [];
+
+
+  @override
+  void initState(){
+    // TODO: implement initState
+    super.initState();
+    final data = historyhive.values.toList();
+    _history = data.reversed.toList();
+
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('eteddd');
     return Scaffold(
      body: SafeArea(
        child: Container(color: Colors.white,
@@ -33,46 +50,64 @@ class _HistorypageState extends State<Historypage> {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: history.length,//play numbner
+                  //HVINGING
+                  itemCount: _history.length,//play numbner
                   itemBuilder: (context,index){
                     return InkWell(
                       onTap: (){
                         showDialog(context: context, builder: (builder)=>
                           AlertDialog(
-                            title: Text('SENT TO ${history[index].totalsent} contacts'),
-                            content: Text(history[index].message),
+                            backgroundColor: Colors.blueGrey,
+                            // title: Text('SENT TO ${_history[index].totalsent} contacts'),
+                            content: const Text('You sure say you wan delete am?'),
                             actions: [
-                              OutlinedButton(onPressed: (){}, child: const Text('DELETE', style: TextStyle(color: Colors.white))),
-                              OutlinedButton(onPressed: (){Navigator.pop(context);}, child: const Text('OK', style: TextStyle(color: Colors.white),))
+                              OutlinedButton(onPressed: (){historyhive.deleteAt(index);_history.removeAt(index);setState(() {
+                                Navigator.pop(context);
+                              });}, child: const Text('DELETE', style: TextStyle(color: Colors.white))),
+                              OutlinedButton(onPressed: (){Navigator.pop(context);}, child: const Text('NAAH', style: TextStyle(color: Colors.white),))
                             ],
                           )
                         );
                       },
                       splashColor: Colors.cyan,
                       child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal:6, vertical: 8),
                         margin: const EdgeInsets.symmetric(vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.blueGrey,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        height: 60,
-                        child: Row(
+                        // height: 60,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(flex:4,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 60),child: Container(
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Text(history[index].message,maxLines: 3,overflow:TextOverflow.ellipsis,),
-                              ),color: Colors.grey[600],))),
-                            Expanded(flex:2,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 60),child: Container(child: Align(alignment: Alignment.topRight, 
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Text(history[index].date,textAlign: TextAlign.left,),
-                              )),color: Colors.grey[700],))),
-                            Expanded(flex:1,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 60),child: Container(child: Align(alignment: Alignment.topRight, 
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Text(history[index].totalsent.toString(),textAlign: TextAlign.left,),
-                              )),color: Colors.grey[800],)),),
+                            Container(
+                              child: Text(_history[index].message,maxLines: 3,overflow:TextOverflow.ellipsis,)),
+                            Container(margin: const EdgeInsets.symmetric(vertical: 10),color: Colors.grey,height: 1,),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                        
+                              children: [
+                                Text(DateFormat.jm().add_yMd().format(_history[index].date),textAlign: TextAlign.left,),
+                                Container(
+                                    padding: const EdgeInsets.symmetric(horizontal:3),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey,
+                                      borderRadius: BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.group),
+                                          const SizedBox(width: 10,),
+                                          Text(_history[index].totalsent.toString(),textAlign: TextAlign.left,),
+                                        ],
+                                      ),
+                                    )
+                                ),
+                              ],                                                                                                    
+                            ),                            
                           ],
                         ),
                       ),

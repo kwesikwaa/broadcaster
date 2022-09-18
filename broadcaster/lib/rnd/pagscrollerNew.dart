@@ -30,8 +30,7 @@ class  _PagescrollerState extends State<Pagescroller> {
 
       if(_pagecontroler.position.userScrollDirection == ScrollDirection.reverse){
         if(calc > 0.7){
-          indexpage = curindex.ceilToDouble();
-          
+          indexpage = curindex.ceilToDouble();    
         }
         else{indexpage = curindex.floorToDouble();}
       }
@@ -108,8 +107,7 @@ class  _PagescrollerState extends State<Pagescroller> {
                             curve: Curves.bounceInOut,
                             margin: EdgeInsets.only(top: index==indexpage?20:40,bottom: 5),
                             decoration: BoxDecoration(
-                              image: DecorationImage(
-                                                
+                              image: DecorationImage(                                                
                                 image: AssetImage(toys[index].image),
                                 fit: BoxFit.cover
                               ),

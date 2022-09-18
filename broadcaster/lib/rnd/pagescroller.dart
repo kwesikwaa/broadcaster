@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class Pagescroller extends StatefulWidget {
-   Pagescroller({Key key}) : super(key: key);
+  Pagescroller({Key key}) : super(key: key);
   final List<String> categories = ['Character','Environment','Vfx','Cloth','Pyro','Matte Painting','2d arts'];
 
   @override

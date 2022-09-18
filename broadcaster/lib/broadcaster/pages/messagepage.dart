@@ -5,6 +5,7 @@ import 'package:broadcaster/broadcaster/pages/draftspage.dart';
 import 'package:broadcaster/broadcaster/pages/groupspage.dart';
 import 'package:broadcaster/broadcaster/pages/history.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class Messagepage extends StatefulWidget {
   final String message;
@@ -24,21 +25,31 @@ class _MessagepageState extends State<Messagepage> {
   var msgfield = TextEditingController();
   final  _scrontroller = ScrollController();
 
+  Box bcgrouphive = Hive.box<BroadcastGroup>('broadcastgroups');
+  Box drafthive = Hive.box<Draft>('drafts');
+
   _movup(){
-    print('in move');
+    // print('in move');
     if(_scrontroller.hasClients){
-      print('moving');
+      // print('moving');
       _scrontroller.animateTo(_scrontroller.position.maxScrollExtent, duration: const Duration(milliseconds: 200),curve: Curves.ease);
-      print('moved');
+      // print('moved');
     }
   }
 
   @override
   void initState() {
     super.initState();
+    // if(broadcastgroups.isNotEmpty)print(broadcastgroups.last.contactlist.length);
+    // bcgrouphive.values.toList();
+    print(bcgrouphive.values.last.contactlist.length);
+    for(var d in bcgrouphive.values.last.contactlist){
+      print(d.nametocall);
+      print(d.contact.contact);
+    }
     if(widget.selectedlists != null && widget.selectedlists.isNotEmpty){
       for(var x in widget.selectedlists){
-        broadcastgroups.map((e){
+        bcgrouphive.values.toList().map((e){
           if(e.groupname == x){
             e.groupselected = true;
           }
@@ -47,6 +58,7 @@ class _MessagepageState extends State<Messagepage> {
     }
     if(widget.message != null){
       msgfield.text = widget.message;
+      
     }
     _scrontroller.addListener(_movup);
     
@@ -97,24 +109,28 @@ class _MessagepageState extends State<Messagepage> {
                         children: 
                         [
                           //using the dart collection for operator
-                          for(var index=0; index<broadcastgroups.length;index++) 
+                          for(var index=0; index<bcgrouphive.length;index++) 
                             OutlinedButton(
                               onPressed: (){
                                 setState(() {
-                                  broadcastgroups[index].groupselected = !broadcastgroups[index].groupselected;  
+                                  bcgrouphive.values.toList()[index].groupselected = !bcgrouphive.values.toList()[index].groupselected;  
                                 });
                               },
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.cyan.withOpacity(broadcastgroups[index].groupselected?1:0),
+                                backgroundColor: Colors.cyan.withOpacity(bcgrouphive.values.toList()[index].groupselected?1:0),
                                 side: const BorderSide(width: 1, color: Colors.cyan)),
-                              child: Text(broadcastgroups[index].groupname,
-                                style: TextStyle(color: broadcastgroups[index].groupselected?Colors.white:Colors.black38),),
+                              child: Text(bcgrouphive.values.toList()[index].groupname,
+                                style: TextStyle(color:bcgrouphive.values.toList()[index].groupselected?Colors.white:Colors.black38),),
                             ),
                             //using the dart spread operator
                           ...[
                             IconButton(
                               onPressed: (){
-                                Navigator.push(context,MaterialPageRoute(builder: (context)=> const Groupspage(roundtrip: true,)));
+                                //added when complete to solve the layering problem
+                                Navigator.push(context,MaterialPageRoute(builder: (context)=> const Groupspage(roundtrip: true,))).whenComplete(
+                                  () => setState((){}));
+                                //sovring a proving ruggedly
+                                
                               }, 
                               icon: const Icon(Icons.add_circle,color:Colors.cyan, size: 30,))
                           ]
@@ -170,7 +186,7 @@ class _MessagepageState extends State<Messagepage> {
                                 onPressed: (){
                                   if(msgfield.text.trim().length>3){
                                     if(widget.id == null){
-                                      var x = broadcastgroups.where((element) => element.groupselected == true).toList();
+                                      var x = bcgrouphive.values.where((element) => element.groupselected == true).toList();
                                       List<String> selectedlist = [];
                                       for(var e in x){
                                         selectedlist.add(e.groupname);
@@ -180,12 +196,15 @@ class _MessagepageState extends State<Messagepage> {
                                         message: msgfield.text,
                                         contactlists: selectedlist
                                       );
-                                      drafts.add(draft);
+                                      // drafts.add(draft);
                                       //hive save
+                                      drafthive.add(draft);
+                                      
                                     }
                                     else{
                                       //update draft value
-                                      var x = broadcastgroups.where((element) => element.groupselected == true).toList();
+                                      //COME BACK TO HIVE THIS ONE AS WELL
+                                      var x = bcgrouphive.values.where((element) => element.groupselected == true).toList();
                                       List<String> selectedlist = [];
                                       for(var e in x){
                                         selectedlist.add(e.groupname);
@@ -199,7 +218,8 @@ class _MessagepageState extends State<Messagepage> {
                                       }
                                     }
                                     msgfield.text = '';
-                                    broadcastgroups.map((e) => e.groupselected = false);
+                                    bcgrouphive.values.map((e) => e.groupselected = false);
+                                    
                                     Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> const Draftspage()));
                                   }
                                 }, 
@@ -212,17 +232,20 @@ class _MessagepageState extends State<Messagepage> {
                               child: ElevatedButton(
                                 onPressed: ()async {
                                   // one takes care of filter the other doesnt
-                                  var sendnew = Sendmessage();
-                                  await sendnew.send(msgfield.text, broadcastgroups);
-                                  // await Sendmessage().send(msgfield.text, broadcastgroups.where((element) => element.groupselected == true).toList());
-                                 
-                                  msgfield.text = '';
-                                  broadcastgroups.map((e) => e.groupselected = false);
-                                  //remove from draft if draft is sent
-                                  if(widget.id != null){
-                                    drafts.removeWhere((element) => element.id==widget.id);
+                                  var x = bcgrouphive.values.where((element) => element.groupselected == true).toList();
+                                  if(msgfield !=null && x.isNotEmpty){
+                                    var sendnew = Sendmessage();
+                                    await sendnew.send(msgfield.text, bcgrouphive.values.toList());
+                                    // await Sendmessage().send(msgfield.text, broadcastgroups.where((element) => element.groupselected == true).toList());
+                                    msgfield.text = '';
+                                    bcgrouphive.values.map((e) => e.groupselected = false);
+                                    //remove from draft if draft is sent
+                                    if(widget.id != null){
+                                      drafthive.delete((element) => element.id==widget.id);
+                                      
+                                    }
+                                    Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> const Historypage()));
                                   }
-                                  Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> const Historypage()));
                                 }, 
                                 child: const Text("SEND"),
                                 style: ElevatedButton.styleFrom(primary: Colors.cyan),

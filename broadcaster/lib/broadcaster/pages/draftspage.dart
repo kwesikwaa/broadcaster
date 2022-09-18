@@ -1,6 +1,7 @@
 import 'package:broadcaster/broadcaster/data_model_etc.dart';
 import 'package:broadcaster/broadcaster/pages/messagepage.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class Draftspage extends StatefulWidget {
   const Draftspage({Key key}) : super(key: key);
@@ -10,6 +11,18 @@ class Draftspage extends StatefulWidget {
 }
 
 class _DraftspageState extends State<Draftspage> {
+
+  Box draftshive = Hive.box<Draft>('drafts');
+  List<Draft> _drafts = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final data = draftshive.values.toList();
+    _drafts = data.reversed.toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,29 +47,54 @@ class _DraftspageState extends State<Draftspage> {
                 ),
               Expanded(
                   child: ListView.builder(
-                    itemCount: drafts.length,//play numbner
+                    itemCount: _drafts.length,//play numbner
                     itemBuilder: (context,index){
                       return InkWell(
                         onTap: (){
-                          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> Messagepage(message: drafts[index].message,id:drafts[index].id,selectedlists: drafts[index].contactlists)));
+                          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=> Messagepage(message: _drafts[index].message,id:_drafts[index].id,selectedlists: _drafts[index].contactlists)));
                         },
                         splashColor: Colors.cyan,
                         child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30)
-                          ),
-                          height: 50,
-                          child: Row(
-                            children: [
-                              Expanded(flex:4,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Text(drafts[index].message,maxLines: 3,overflow:TextOverflow.ellipsis,),color: Colors.grey[600],))),
-                              // Expanded(flex:2,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Align(alignment: Alignment.topRight, child: Text(drafts[index].date,textAlign: TextAlign.left,)),color: Colors.grey[700],))),
-                              Expanded(flex:1,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Align(alignment: Alignment.topRight, child: Text(drafts[index].contactlists.length.toString(),textAlign: TextAlign.left,)),color: Colors.grey[800],)),),
-                              // Expanded(flex:1,child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 50),child: Container(child: Align(alignment: Alignment.topRight, child: Text(drafts[index].id,textAlign: TextAlign.left,)),color: Colors.grey[800],)),),
-                            ],
-                          ),
+                        padding: const EdgeInsets.symmetric(horizontal:6, vertical: 8),
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.brown,
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                        // height: 60,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              child: Text(_drafts[index].message,maxLines: 3,overflow:TextOverflow.ellipsis,)),
+                            Container(margin: const EdgeInsets.symmetric(vertical: 10),color: Colors.white,height: 1,),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                        
+                              children: [
+                                // Text(_drafts[index].date.toIso8601String(),textAlign: TextAlign.left,),
+                                Container(
+                                    padding: const EdgeInsets.symmetric(horizontal:3),
+                                    decoration: BoxDecoration(
+                                      color: Colors.brown[200],
+                                      borderRadius: BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.groups_sharp),
+                                          const SizedBox(width: 10,),
+                                          Text(_drafts[index].contactlists.length.toString(),textAlign: TextAlign.left,),
+                                        ],
+                                      ),
+                                    )
+                                ),
+                              ],                                                                                                    
+                            ),                            
+                          ],
+                        ),
+                      ),
                       );
                     }),
                 )  

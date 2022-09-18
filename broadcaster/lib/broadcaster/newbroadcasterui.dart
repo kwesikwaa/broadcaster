@@ -27,6 +27,7 @@ class BroadcastUI extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: 10,sigmaY: 10),
               child: Container(color: Colors.white70.withOpacity(0.91),),),
           ),
+          
           Align(
             alignment: const Alignment(0,-0.6),
             child: AnimatedScale(

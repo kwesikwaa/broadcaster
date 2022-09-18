@@ -1,8 +1,11 @@
+import 'package:hive/hive.dart';
 import 'package:telephony/telephony.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+part 'data_model_etc.g.dart';
 
 
 
@@ -10,34 +13,32 @@ class Switchy{
   static bool open = false;
 }
 
+//open these boxes in hive on init
+
 List<BroadcastGroup>  broadcastgroups = [];
-List<History> history = [
-  // History(totalsent: 10, date: '30/07/2022', message: 'Yo we dey town today anaa'),
-  // History(totalsent: 25, date: '02/04/2022', message: 'Hello Sign up to our new packag '),
-  // History(totalsent: 12, date: '26/08/2022', message: 'we have introduce a new deal kindly take time to go through'),
-  // History(totalsent: 7, date: '18/12/2022', message: 'Chale the match dey go on so make we postpone the tin'),
-  // History(totalsent: 62, date: '10/01/2022', message: 'The monkey business all for end chale'),
-  // History(totalsent: 35, date: '06/03/2022', message: 'The oyarifa traffic just be myth aswear! nothing like that dey'),
-  // History(totalsent: 11, date: '28/02/2022', message: 'Hi, make a date with us '),
-  // History(totalsent: 23, date: '10/05/2022', message: 'Kindly follow the link to be put on the daily something'),
-  // History(totalsent: 42, date: '09/09/2022', message: 'Everything go fall in the right place'),
-  // History(totalsent: 10200, date: '24/14/2022', message: 'Tech no be hype chale'),
-  // History(totalsent: 87, date: '22/06/2022', message: 'The date for the workshop has been moved furhter to the so and so be on the look out for it. Same venue, same agenda'),
-];
+List<History> history = [];
 List<Draft> drafts = [];
 
+@HiveType(typeId: 0)
 class Draft{
+  @HiveField(0)
   String id;
+  @HiveField(1)
   String message;
+  @HiveField(2)
   List<String> contactlists;
 
   Draft({this.id, this.message, this.contactlists});
 }
 
+@HiveType(typeId: 1)
 class History{
+  @HiveField(0)
   String message;
+  @HiveField(1)
   int totalsent;
-  String date;
+  @HiveField(2)
+  DateTime date;
 
   History({this.message, this.totalsent, this.date});
 }
@@ -48,57 +49,78 @@ class Sendmessage{
   var y = [];
   int totalsent = 0;
 
-  send(String msgfield, List<BroadcastGroup> castlist) async{
+  send(String msgfield, List<BroadcastGroup> castlist)async{
     bool ithasname = msgfield.contains("@namehere") ? true : false;    
-    if(msgfield != null && castlist.isNotEmpty){
-        List<BroadcastGroup> templist = [];
-        //add selected groups to tepmlist eg. hood, jss mates etc
-        // taken care of in UI??
-        for(var group in castlist){
-          if(group.groupselected){
-            templist.add(group);
-          }
-        }
-        for(BroadcastGroup eachgroup in templist) //eg. uni mates
-        {
-          for(BroadcastContact eachcontact in eachgroup.contactlist){
-            var name = eachcontact.nametocall;
-            var contact = eachcontact.contact.contact;
-            var message = ithasname ? msgfield.replaceAll("@namehere", name) : msgfield;
-            totalsent ++;
-            await telephony.sendSms(to: contact, message: message);
-          }
-        }  
-        History hist = History(
-            date: DateTime.now().toString(),
-            message: msgfield,
-            totalsent: totalsent //replace this
-          );
-        history.add(hist);
+    List<BroadcastGroup> templist = [];
+    //add selected groups to tepmlist eg. hood, jss mates etc
+    // taken care of in UI??
+    for(var group in castlist){
+      if(group.groupselected){
+        templist.add(group);
+      }
     }
+    print('here anaa');
+    print(templist.length);
+    for(BroadcastGroup eachgroup in templist) //eg. uni mates
+    {
+      
+      for(BroadcastContact eachcontact in eachgroup.contactlist){
+        print('sending...');
+        var name = eachcontact.nametocall;
+        var contact = eachcontact.contact.contact;
+        var message = ithasname ? msgfield.replaceAll("@namehere", name) : msgfield;
+        print(name);
+        print(contact);
+        print(message);
+        totalsent ++;
+        await telephony.sendSms(to: contact, message: message);
+      }
+    }  
+    History hist = History(
+        date: DateTime.now(),
+        message: msgfield,
+        totalsent: totalsent //replace this
+      );
+    // history.add(hist);
+    // if both will be on memeory why not take out the above
+    // await Hive.openBox<History>('history').then((value) => value.put('hist.date', hist));
+    Hive.box<History>('history').add(hist);
   }
 }
 
 /// CONTACTS RELATED
 /// 
+@HiveType(typeId: 2)
 class PhoneContact{
+  @HiveField(0)
   String contact;
+  @HiveField(1)
   bool selected = false;
+  @HiveField(2)
   String name;
 
   PhoneContact({this.contact, this.selected, this.name});   
 }
+
+@HiveType(typeId: 3)
 class BroadcastContact{
+  @HiveField(0)
   PhoneContact  contact;
+  @HiveField(1)
   String nametocall;
 
   BroadcastContact({@required this.contact, this.nametocall});
 }
 
-class BroadcastGroup{
+
+@HiveType(typeId: 4)
+class BroadcastGroup extends HiveObject{
+  @HiveField(0)
   String groupname;
+  @HiveField(1)
   bool groupselected = false;
-  List<BroadcastContact> contactlist = [];
+  @HiveField(2)
+  List<BroadcastContact> contactlist;
 
   BroadcastGroup({this.groupname, this.groupselected, this.contactlist});
 }
@@ -158,8 +180,17 @@ class ContactsClass{
     // broadcastlist.clear();
     allcontacts.map((e) => e.selected=false).toList();
   }
-  savebroadcastlist({List<BroadcastContact> castlist, String groupname, bool selected}){
+  savebroadcastlist({List<BroadcastContact> castlist, String groupname, bool selected, Box boxtosaveto}){
     BroadcastGroup onegroup = BroadcastGroup(groupname: groupname, contactlist: castlist, groupselected: selected);
-    broadcastgroups.add(onegroup);
+    boxtosaveto.add(onegroup);
+    // broadcastgroups.add(onegroup);
+    print(boxtosaveto);
+    print(boxtosaveto.values.length);
+    print(boxtosaveto.values.first);
+    print(boxtosaveto.values.toList());
+    for(var d in boxtosaveto.values){
+      print(d.groupname);
+      print(d.contactlist.length);
+    }
   }
 }

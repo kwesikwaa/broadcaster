@@ -5,6 +5,7 @@ class Toyitem{
   String artist;
   double price;
   String image;
+  //add reveiew and remove artist if it is a toys shop
 
   Toyitem({
     this.name,

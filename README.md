@@ -8,8 +8,3 @@ ie. "Hello John" "Hello Doe" Hello etc etc.
 Utilises Hivedb as local database for history and drafts
 
 
-<strong>Toy Shop</strong>
-============================
-Full functional ecommerce app for a toyshop. allows custormers to see items in 3d preview
-It utilises flutter hooks and riverpod.
-Also implements PayStack for payment
